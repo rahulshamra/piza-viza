@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+
 const Page = () => {
     const [orderinfo, setOrderinfo] = useState([]);
 
@@ -23,10 +24,11 @@ const Page = () => {
             }
 
             let data = await res.json();
-            const datamanu = data.order_data;
+            const datamanu = data.order_data || []; // Ensure it's always an array
             setOrderinfo(datamanu);
         } catch (error) {
             console.error('Fetch error:', error);
+            setOrderinfo([]); // Fallback to an empty array in case of error
         }
     };
 
@@ -36,7 +38,7 @@ const Page = () => {
 
     return (
         <>
-            {orderinfo.length === 0 ? (
+            {Array.isArray(orderinfo) && orderinfo.length === 0 ? (
                 <div className='flex flex-col justify-center items-center mt-32'>
                     <h3 className="text-bold text-2xl text-center">No orders</h3>
                     <span><Image height={70} width={70} src={"/sad1.png"} className='h-[70px] w-[70px]' alt="No orders" /></span>
@@ -46,16 +48,16 @@ const Page = () => {
                 </div>
             ) : (
                 <div className='mx-auto'>
-                    {orderinfo.map((order, orderIndex) => (
+                    {Array.isArray(orderinfo) && orderinfo.map((order, orderIndex) => (
                         <div key={orderIndex} className='order-section'>
-                            {order.map((item, itemIndex) => (
+                            {Array.isArray(order) && order.map((item, itemIndex) => (
                                 item.order_date ? (
                                     <div key={itemIndex} className='text-white'>
                                         Order Date: {item.order_date}
                                     </div>
                                 ) : (
-                                    <div key={`${item._id}`} className='h-[250px] px-2 w-[390px] flex justify-center items-center border-gray-200 rounded-md border m-2'>
-                                        <Image height={200} width={200}  className='w-[200px] p-1 rounded-md h-[200px] mx-1' src={item.Image} alt={item.name} />
+                                    <div key={item._id || itemIndex} className='h-[250px] px-2 w-[390px] flex justify-center items-center border-gray-200 rounded-md border m-2'>
+                                        <Image height={200} width={200} className='w-[200px] p-1 rounded-md h-[200px] mx-1' src={item.Image} alt={item.name} />
                                         <div className='flex flex-col gap-2'>
                                             <p>{item.name}</p>
                                             <p>Price: {item.price}/-</p>
